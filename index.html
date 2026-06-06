@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed Generator - Discord</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f13;
+            color: #e1e1e6;
+            line-height: 1.5;
+        }
+
+        /* Layout principal */
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Painel de controle */
+        .sidebar {
+            width: 380px;
+            background: #1a1a1f;
+            border-right: 1px solid #2a2a30;
+            padding: 32px 24px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar .subtitle {
+            font-size: 0.8rem;
+            color: #8a8a96;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a2a30;
+        }
+
+        /* Grupos de campos */
+        .field-group {
+            margin-bottom: 24px;
+        }
+
+        .field-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8a8a96;
+            margin-bottom: 8px;
+        }
+
+        .field-group input,
+        .field-group textarea,
+        .field-group select {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0f0f13;
+            border: 1px solid #2a2a30;
+            border-radius: 10px;
+            color: #e1e1e6;
+            font-size: 0.85rem;
+            font-family: 'Inter', monospace;
+            transition: all 0.2s ease;
+        }
+
+        .field-group input:focus,
+        .field-group textarea:focus {
+            outline: none;
+            border-color: #5a4b8c;
+            box-shadow: 0 0 0 3px rgba(90, 75, 140, 0.15);
+        }
+
+        .field-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        /* Input de cor */
+        .color-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .color-row input[type="color"] {
+            width: 52px;
+            height: 44px;
+            padding: 4px;
+            background: #0f0f13;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .color-row input[type="text"] {
+            flex: 1;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        /* Botões */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #2a2a30;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #5a4b8c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #6b5a9e;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #2a2a30;
+            color: #e1e1e6;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a42;
+        }
+
+        /* Preview area */
+        .preview-area {
+            margin-left: 380px;
+            flex: 1;
+            padding: 48px 40px;
+            background: #0a0a0c;
+            min-height: 100vh;
+        }
+
+        .preview-header {
+            margin-bottom: 28px;
+        }
+
+        .preview-header h2 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #8a8a96;
+        }
+
+        .preview-header h2 span {
+            color: #5a4b8c;
+            font-family: monospace;
+        }
+
+        /* Card do embed */
+        .embed-card {
+            max-width: 520px;
+            background: #1e1e22;
+            border-radius: 12px;
+            overflow: hidden;
+            border-left: 4px solid #5a4b8c;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .embed-body {
+            padding: 20px;
+        }
+
+        .embed-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .embed-description {
+            font-size: 0.85rem;
+            color: #c4c4cc;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .embed-description a {
+            color: #8f7bc2;
+            text-decoration: none;
+        }
+
+        .embed-description a:hover {
+            text-decoration: underline;
+        }
+
+        .embed-image {
+            margin-top: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .embed-image img {
+            width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .embed-thumbnail {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .embed-thumbnail img {
+            width: 72px;
+            height: 72px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .embed-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #2e2e35;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            color: #8a8a96;
+        }
+
+        .embed-footer img {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+        }
+
+        /* Botões de ação do preview */
+        .preview-actions {
+            margin-top: 28px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .preview-actions .btn {
+            max-width: 200px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2a2a30;
+            border-left: 3px solid #5a4b8c;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #e1e1e6;
+            font-size: 0.85rem;
+            animation: fadeInUp 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #1a1a1f;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #3a3a42;
+            border-radius: 10px;
+        }
+
+        /* Dica */
+        .hint {
+            font-size: 0.7rem;
+            color: #5a4b8c;
+            margin-top: 6px;
+            display: block;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #2a2a30;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Painel de controle -->
+        <div class="sidebar">
+            <h1>Embed Generator</h1>
+            <div class="subtitle">Crie e personalize seu embed para Discord</div>
+
+            <div class="field-group">
+                <label>Titulo</label>
+                <input type="text" id="titleInput" placeholder="Digite o titulo do embed" value="Downloads EclipseMC">
+            </div>
+
+            <div class="field-group">
+                <label>Descricao</label>
+                <textarea id="descInput" placeholder="Digite a descricao...">**PC** – Clique aqui para baixar
+https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe
+
+**Mobile** – Clique aqui para baixar
+https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk
+
+**Duvidas?** Abra ticket em <#1502708446443737321>
+
+eclipsemcc.com.br</textarea>
+            </div>
+
+            <div class="field-group">
+                <label>Cor do embed</label>
+                <div class="color-row">
+                    <input type="color" id="colorPicker" value="#5a4b8c">
+                    <input type="text" id="colorHex" value="#5a4b8c" placeholder="#5a4b8c">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Imagem principal (banner)</label>
+                <input type="text" id="imageInput" placeholder="URL da imagem" value="https://cdn.discordapp.com/attachments/1502104075724914878/1502104233254846514/Gemini_Generated_Image_yt6llhyt6llhyt6l.png">
+                <span class="hint">Imagem grande que aparece dentro do embed</span>
+            </div>
+
+            <div class="field-group">
+                <label>Thumbnail (icone pequeno)</label>
+                <input type="text" id="thumbnailInput" placeholder="URL da thumbnail (opcional)">
+                <span class="hint">Imagem pequena no canto superior direito</span>
+            </div>
+
+            <div class="field-group">
+                <label>Footer (rodape)</label>
+                <input type="text" id="footerTextInput" placeholder="Texto do rodape" value="EclipseMC">
+            </div>
+
+            <div class="field-group">
+                <label>Icone do footer</label>
+                <input type="text" id="footerIconInput" placeholder="URL do icone (opcional)">
+            </div>
+
+            <hr>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="copyBtn">Copiar JSON</button>
+                <button class="btn btn-secondary" id="resetBtn">Resetar</button>
+            </div>
+        </div>
+
+        <!-- Area de preview -->
+        <div class="preview-area">
+            <div class="preview-header">
+                <h2>Preview <span>ao vivo</span></h2>
+            </div>
+
+            <div class="embed-card" id="embedPreview">
+                <div class="embed-body">
+                    <div class="embed-title" id="previewTitle">Downloads EclipseMC</div>
+                    <div class="embed-description" id="previewDesc">**PC** – Clique aqui para baixar<br>https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe<br><br>**Mobile** – Clique aqui para baixar<br>https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk<br><br>**Duvidas?** Abra ticket em &lt;#1502708446443737321&gt;<br><br>eclipsemcc.com.br</div>
+                    <div class="embed-image" id="previewImageContainer" style="display: none;"></div>
+                    <div class="embed-thumbnail" id="previewThumbnailContainer" style="display: none;"></div>
+                    <div class="embed-footer" id="previewFooter" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="preview-actions">
+                <button class="btn btn-secondary" id="webhookBtn">Enviar para webhook</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos do formulario
+        const titleInput = document.getElementById('titleInput');
+        const descInput = document.getElementById('descInput');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorHex = document.getElementById('colorHex');
+        const imageInput = document.getElementById('imageInput');
+        const thumbnailInput = document.getElementById('thumbnailInput');
+        const footerTextInput = document.getElementById('footerTextInput');
+        const footerIconInput = document.getElementById('footerIconInput');
+        
+        // Elementos do preview
+        const previewTitle = document.getElementById('previewTitle');
+        const previewDesc = document.getElementById('previewDesc');
+        const previewImageContainer = document.getElementById('previewImageContainer');
+        const previewThumbnailContainer = document.getElementById('previewThumbnailContainer');
+        const previewFooter = document.getElementById('previewFooter');
+        const embedCard = document.getElementById('embedPreview');
+
+        // Funcao para converter hex para decimal (cor do Discord)
+        function hexToDecimal(hex) {
+            return parseInt(hex.replace('#', ''), 16);
+        }
+
+        // Funcao para formatar texto com markdown basico
+        function formatMarkdown(text) {
+            if (!text) return '';
+            let formatted = text;
+            // Links [texto](url)
+            formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+            // Links diretos (http/https)
+            formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+            // Negrito **texto**
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Italico *texto*
+            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Quebras de linha
+            formatted = formatted.replace(/\n/g, '<br>');
+            // Mencoes de canal <#id>
+            formatted = formatted.replace(/<#(\d+)>/g, '<span style="color:#8f7bc2">#canal</span>');
+            return formatted;
+        }
+
+        // Atualizar preview ao vivo
+        function updatePreview() {
+            // Titulo
+            previewTitle.textContent = titleInput.value || 'Sem titulo';
+            
+            // Descricao
+            previewDesc.innerHTML = formatMarkdown(descInput.value);
+            
+            // Cor da borda
+            const hexColor = colorHex.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
+                embedCard.style.borderLeftColor = hexColor;
+            }
+            
+            // Imagem principal
+            const imageUrl = imageInput.value.trim();
+            if (imageUrl) {
+                previewImageContainer.style.display = 'block';
+                previewImageContainer.innerHTML = `<img src="${imageUrl}" alt="Embed image" onerror="this.src='https://placehold.co/600x200/1a1a1f/5a4b8c?text=Imagem+invalida'">`;
+            } else {
+                previewImageContainer.style.display = 'none';
+                previewImageContainer.innerHTML = '';
+            }
+            
+            // Thumbnail
+            const thumbnailUrl = thumbnailInput.value.trim();
+            if (thumbnailUrl) {
+                previewThumbnailContainer.style.display = 'flex';
+                previewThumbnailContainer.innerHTML = `<img src="${thumbnailUrl}" alt="Thumbnail" onerror="this.style.display='none'">`;
+            } else {
+                previewThumbnailContainer.style.display = 'none';
+                previewThumbnailContainer.innerHTML = '';
+            }
+            
+            // Footer
+            const footerText = footerTextInput.value.trim();
+            const footerIcon = footerIconInput.value.trim();
+            if (footerText || footerIcon) {
+                previewFooter.style.display = 'flex';
+                let footerHtml = '';
+                if (footerIcon) {
+                    footerHtml += `<img src="${footerIcon}" alt="Footer icon" onerror="this.style.display='none'">`;
+                }
+                if (footerText) {
+                    footerHtml += `<span>${footerText}</span>`;
+                }
+                previewFooter.innerHTML = footerHtml;
+            } else {
+                previewFooter.style.display = 'none';
+                previewFooter.innerHTML = '';
+            }
+        }
+
+        // Gerar JSON completo
+        function generateJSON() {
+            const embed = {
+                title: titleInput.value,
+                description: descInput.value,
+                color: hexToDecimal(colorHex.value)
+            };
+            
+            const imageUrl = imageInput.value.trim();
+            if (imageUrl) {
+                embed.image = { url: imageUrl };
+            }
+            
+            const thumbnailUrl = thumbnailInput.value.trim();
+            if (thumbnailUrl) {
+                embed.thumbnail = { url: thumbnailUrl };
+            }
+            
+            const footerText = footerTextInput.value.trim();
+            const footerIcon = footerIconInput.value.trim();
+            if (footerText || footerIcon) {
+                embed.footer = {};
+                if (footerText) embed.footer.text = footerText;
+                if (footerIcon) embed.footer.icon_url = footerIcon;
+            }
+            
+            const json = {
+                content: "",
+                embeds: [embed],
+                components: [
+                    {
+                        type: 1,
+                        components: [
+                            { type: 2, label: "PC", style: 5, url: "https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe?rlkey=4p3y0ifpvukd01pubg737a2nk&st=w0m9yjxu&dl=1" },
+                            { type: 2, label: "Mobile", style: 5, url: "https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk" },
+                            { type: 2, label: "Ticket", style: 5, url: "https://discord.com/channels/SEU_SERVIDOR_ID/1502708446443737321" }
+                        ]
+                    }
+                ]
+            };
+            
+            return JSON.stringify(json, null, 2);
+        }
+
+        // Copiar JSON
+        async function copyJSON() {
+            const json = generateJSON();
+            try {
+                await navigator.clipboard.writeText(json);
+                showToast('JSON copiado com sucesso');
+            } catch (err) {
+                showToast('Erro ao copiar', 'error');
+            }
+        }
+
+        // Mostrar notificacao
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Resetar valores padrao
+        function resetDefaults() {
+            titleInput.value = 'Downloads EclipseMC';
+            descInput.value = '**PC** – Clique aqui para baixar\nhttps://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe\n\n**Mobile** – Clique aqui para baixar\nhttps://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk\n\n**Duvidas?** Abra ticket em <#1502708446443737321>\n\neclipsemcc.com.br';
+            colorPicker.value = '#5a4b8c';
+            colorHex.value = '#5a4b8c';
+            imageInput.value = 'https://cdn.discordapp.com/attachments/1502104075724914878/1502104233254846514/Gemini_Generated_Image_yt6llhyt6llhyt6l.png';
+            thumbnailInput.value = '';
+            footerTextInput.value = 'EclipseMC';
+            footerIconInput.value = '';
+            updatePreview();
+            showToast('Valores resetados');
+        }
+
+        // Enviar para webhook
+        async function sendToWebhook() {
+            const webhookUrl = prompt('Cole a URL do webhook do Discord:');
+            if (!webhookUrl) return;
+            
+            if (!webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+                showToast('URL de webhook invalida', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: generateJSON()
+                });
+                
+                if (response.ok) {
+                    showToast('Embed enviado com sucesso');
+                } else {
+                    showToast('Erro ao enviar', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexao', 'error');
+            }
+        }
+
+        // Eventos
+        titleInput.addEventListener('input', updatePreview);
+        descInput.addEventListener('input', updatePreview);
+        imageInput.addEventListener('input', updatePreview);
+        thumbnailInput.addEventListener('input', updatePreview);
+        footerTextInput.addEventListener('input', updatePreview);
+        footerIconInput.addEventListener('input', updatePreview);
+        
+        colorPicker.addEventListener('input', (e) => {
+            colorHex.value = e.target.value;
+            updatePreview();
+        });
+        
+        colorHex.addEventListener('input', (e) => {
+            let val = e.target.value;
+            if (!val.startsWith('#')) val = '#' + val;
+            if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
+                colorPicker.value = val;
+                updatePreview();
+            } else if (val.length <= 7) {
+                updatePreview();
+            }
+        });
+        
+        document.getElementById('copyBtn').addEventListener('click', copyJSON);
+        document.getElementById('resetBtn').addEventListener('click', resetDefaults);
+        document.getElementById('webhookBtn').addEventListener('click', sendToWebhook);
+        
+        // Inicializar preview
+        updatePreview();
+    </script>
+</body>
+</html>
