@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embed Generator - Discord</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Embed Studio Pro - Discord JSON Editor</title>
     <style>
         * {
             margin: 0;
@@ -18,7 +18,6 @@
             line-height: 1.5;
         }
 
-        /* Layout principal */
         .app {
             display: flex;
             min-height: 100vh;
@@ -26,7 +25,7 @@
 
         /* Sidebar - Painel de controle */
         .sidebar {
-            width: 380px;
+            width: 400px;
             background: #1a1a1f;
             border-right: 1px solid #2a2a30;
             padding: 32px 24px;
@@ -36,10 +35,14 @@
         }
 
         .sidebar h1 {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 600;
             margin-bottom: 8px;
             letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #c0b5f0, #8f7bc2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .sidebar .subtitle {
@@ -50,7 +53,6 @@
             border-bottom: 1px solid #2a2a30;
         }
 
-        /* Grupos de campos */
         .field-group {
             margin-bottom: 24px;
         }
@@ -82,8 +84,8 @@
         .field-group input:focus,
         .field-group textarea:focus {
             outline: none;
-            border-color: #5a4b8c;
-            box-shadow: 0 0 0 3px rgba(90, 75, 140, 0.15);
+            border-color: #7c6bb3;
+            box-shadow: 0 0 0 3px rgba(124, 107, 179, 0.2);
         }
 
         .field-group textarea {
@@ -93,7 +95,6 @@
             line-height: 1.5;
         }
 
-        /* Input de cor */
         .color-row {
             display: flex;
             gap: 12px;
@@ -107,6 +108,7 @@
             background: #0f0f13;
             border-radius: 10px;
             cursor: pointer;
+            border: 1px solid #2a2a30;
         }
 
         .color-row input[type="text"] {
@@ -115,13 +117,13 @@
             font-size: 0.85rem;
         }
 
-        /* Botões */
         .button-group {
             display: flex;
             gap: 12px;
             margin-top: 28px;
             padding-top: 20px;
             border-top: 1px solid #2a2a30;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -134,6 +136,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: inherit;
+            text-align: center;
         }
 
         .btn-primary {
@@ -155,9 +158,27 @@
             background: #3a3a42;
         }
 
-        /* Preview area */
+        .btn-accent {
+            background: #1e3a4d;
+            color: #9ad7f5;
+            border: 1px solid #2e577a;
+        }
+
+        .btn-accent:hover {
+            background: #2a4c64;
+        }
+
+        .btn-warning {
+            background: #4a2e2e;
+            color: #ffaaaa;
+        }
+
+        .btn-warning:hover {
+            background: #5e3a3a;
+        }
+
         .preview-area {
-            margin-left: 380px;
+            margin-left: 400px;
             flex: 1;
             padding: 48px 40px;
             background: #0a0a0c;
@@ -175,18 +196,18 @@
         }
 
         .preview-header h2 span {
-            color: #5a4b8c;
+            color: #8f7bc2;
             font-family: monospace;
         }
 
-        /* Card do embed */
         .embed-card {
-            max-width: 520px;
+            max-width: 540px;
             background: #1e1e22;
             border-radius: 12px;
             overflow: hidden;
             border-left: 4px solid #5a4b8c;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transition: border 0.1s ease;
         }
 
         .embed-body {
@@ -261,18 +282,13 @@
             border-radius: 50%;
         }
 
-        /* Botões de ação do preview */
         .preview-actions {
             margin-top: 28px;
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .preview-actions .btn {
-            max-width: 200px;
-        }
-
-        /* Toast notification */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -299,7 +315,6 @@
             }
         }
 
-        /* Scrollbar */
         .sidebar::-webkit-scrollbar {
             width: 5px;
         }
@@ -313,10 +328,9 @@
             border-radius: 10px;
         }
 
-        /* Dica */
         .hint {
             font-size: 0.7rem;
-            color: #5a4b8c;
+            color: #7a6aae;
             margin-top: 6px;
             display: block;
         }
@@ -326,23 +340,62 @@
             border-top: 1px solid #2a2a30;
             margin: 12px 0;
         }
+
+        .json-import-area {
+            background: #0f0f13;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 24px;
+            border: 1px dashed #3a3a48;
+        }
+
+        .json-import-area textarea {
+            font-size: 0.75rem;
+            font-family: 'SF Mono', monospace;
+            min-height: 100px;
+            background: #0a0a0e;
+        }
+
+        .flex-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
     <div class="app">
-        <!-- Painel de controle -->
         <div class="sidebar">
-            <h1>Embed Generator</h1>
-            <div class="subtitle">Crie e personalize seu embed para Discord</div>
+            <h1>🎨 Embed Studio Pro</h1>
+            <div class="subtitle">Crie, edite e carregue JSONs prontos</div>
+
+            <!-- NOVO: Painel para carregar JSON existente -->
+            <div class="json-import-area">
+                <label style="font-size:0.75rem; font-weight:600;">📂 Carregar JSON existente</label>
+                <textarea id="jsonLoaderInput" placeholder='Cole aqui o JSON do embed (formato Discord) ... Exemplo: {"embeds": [{"title": "Olá", "description": "Mundo"}]}'></textarea>
+                <div class="flex-buttons">
+                    <button id="loadJsonBtn" class="btn btn-accent btn-small">🔁 Carregar & Editar</button>
+                    <button id="clearJsonLoaderBtn" class="btn btn-warning btn-small">🗑️ Limpar</button>
+                </div>
+                <span class="hint">⬆ Cole qualquer JSON compatível com Discord (embed) e clique em "Carregar & Editar" para preencher os campos e editar livremente.</span>
+            </div>
+
+            <hr>
 
             <div class="field-group">
-                <label>Titulo</label>
+                <label>📌 Titulo</label>
                 <input type="text" id="titleInput" placeholder="Digite o titulo do embed" value="Downloads EclipseMC">
             </div>
 
             <div class="field-group">
-                <label>Descricao</label>
-                <textarea id="descInput" placeholder="Digite a descricao...">**PC** – Clique aqui para baixar
+                <label>📝 Descricao</label>
+                <textarea id="descInput" placeholder="Digite a descricao... (suporta **negrito**, *italico*, links e quebras de linha)">**PC** – Clique aqui para baixar
 https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe
 
 **Mobile** – Clique aqui para baixar
@@ -354,7 +407,7 @@ eclipsemcc.com.br</textarea>
             </div>
 
             <div class="field-group">
-                <label>Cor do embed</label>
+                <label>🎨 Cor do embed</label>
                 <div class="color-row">
                     <input type="color" id="colorPicker" value="#5a4b8c">
                     <input type="text" id="colorHex" value="#5a4b8c" placeholder="#5a4b8c">
@@ -362,45 +415,43 @@ eclipsemcc.com.br</textarea>
             </div>
 
             <div class="field-group">
-                <label>Imagem principal (banner)</label>
+                <label>🖼️ Imagem principal (banner)</label>
                 <input type="text" id="imageInput" placeholder="URL da imagem" value="https://cdn.discordapp.com/attachments/1502104075724914878/1502104233254846514/Gemini_Generated_Image_yt6llhyt6llhyt6l.png">
-                <span class="hint">Imagem grande que aparece dentro do embed</span>
+                <span class="hint">Imagem grande dentro do embed</span>
             </div>
 
             <div class="field-group">
-                <label>Thumbnail (icone pequeno)</label>
+                <label>🖼️ Thumbnail (icone pequeno)</label>
                 <input type="text" id="thumbnailInput" placeholder="URL da thumbnail (opcional)">
-                <span class="hint">Imagem pequena no canto superior direito</span>
+                <span class="hint">Canto superior direito</span>
             </div>
 
             <div class="field-group">
-                <label>Footer (rodape)</label>
+                <label>📌 Footer (rodape)</label>
                 <input type="text" id="footerTextInput" placeholder="Texto do rodape" value="EclipseMC">
             </div>
 
             <div class="field-group">
-                <label>Icone do footer</label>
+                <label>🔗 Icone do footer</label>
                 <input type="text" id="footerIconInput" placeholder="URL do icone (opcional)">
             </div>
 
-            <hr>
-
             <div class="button-group">
-                <button class="btn btn-primary" id="copyBtn">Copiar JSON</button>
-                <button class="btn btn-secondary" id="resetBtn">Resetar</button>
+                <button class="btn btn-primary" id="copyBtn">📋 Copiar JSON</button>
+                <button class="btn btn-secondary" id="resetBtn">🔄 Resetar Padrão</button>
+                <button class="btn btn-accent" id="exportJsonBtn">💾 Exportar JSON</button>
             </div>
         </div>
 
-        <!-- Area de preview -->
         <div class="preview-area">
             <div class="preview-header">
-                <h2>Preview <span>ao vivo</span></h2>
+                <h2>👁️ Preview <span>ao vivo</span> — visualização exata do embed</h2>
             </div>
 
             <div class="embed-card" id="embedPreview">
                 <div class="embed-body">
                     <div class="embed-title" id="previewTitle">Downloads EclipseMC</div>
-                    <div class="embed-description" id="previewDesc">**PC** – Clique aqui para baixar<br>https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe<br><br>**Mobile** – Clique aqui para baixar<br>https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk<br><br>**Duvidas?** Abra ticket em &lt;#1502708446443737321&gt;<br><br>eclipsemcc.com.br</div>
+                    <div class="embed-description" id="previewDesc"></div>
                     <div class="embed-image" id="previewImageContainer" style="display: none;"></div>
                     <div class="embed-thumbnail" id="previewThumbnailContainer" style="display: none;"></div>
                     <div class="embed-footer" id="previewFooter" style="display: none;"></div>
@@ -408,13 +459,15 @@ eclipsemcc.com.br</textarea>
             </div>
 
             <div class="preview-actions">
-                <button class="btn btn-secondary" id="webhookBtn">Enviar para webhook</button>
+                <button class="btn btn-secondary" id="webhookBtn">📡 Enviar para webhook</button>
+                <button class="btn btn-secondary" id="downloadJsonBtn">⬇️ Baixar JSON</button>
             </div>
+            <div class="hint" style="margin-top: 16px;">✅ O botão "Carregar & Editar" aceita JSONs com ou sem components, extrai título, descrição, cor, imagens, footer e thumbnail para você editar livremente!</div>
         </div>
     </div>
 
     <script>
-        // Elementos do formulario
+        // Elementos DOM
         const titleInput = document.getElementById('titleInput');
         const descInput = document.getElementById('descInput');
         const colorPicker = document.getElementById('colorPicker');
@@ -424,7 +477,6 @@ eclipsemcc.com.br</textarea>
         const footerTextInput = document.getElementById('footerTextInput');
         const footerIconInput = document.getElementById('footerIconInput');
         
-        // Elementos do preview
         const previewTitle = document.getElementById('previewTitle');
         const previewDesc = document.getElementById('previewDesc');
         const previewImageContainer = document.getElementById('previewImageContainer');
@@ -432,76 +484,82 @@ eclipsemcc.com.br</textarea>
         const previewFooter = document.getElementById('previewFooter');
         const embedCard = document.getElementById('embedPreview');
 
-        // Funcao para converter hex para decimal (cor do Discord)
+        // Loader JSON textarea
+        const jsonLoaderInput = document.getElementById('jsonLoaderInput');
+        const loadJsonBtn = document.getElementById('loadJsonBtn');
+        const clearJsonLoaderBtn = document.getElementById('clearJsonLoaderBtn');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+
+        // Helper: hex -> decimal
         function hexToDecimal(hex) {
-            return parseInt(hex.replace('#', ''), 16);
+            let clean = hex.replace('#', '');
+            if (clean.length === 3) clean = clean.split('').map(c => c+c).join('');
+            if (!/^[0-9A-Fa-f]{6}$/.test(clean)) return 0x5a4b8c;
+            return parseInt(clean, 16);
         }
 
-        // Funcao para formatar texto com markdown basico
+        // decimal -> hex string com #
+        function decimalToHex(decimal) {
+            let hex = Number(decimal).toString(16).padStart(6, '0');
+            return `#${hex.slice(0,6)}`;
+        }
+
+        // formatação markdown simples para preview
         function formatMarkdown(text) {
             if (!text) return '';
             let formatted = text;
-            // Links [texto](url)
             formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-            // Links diretos (http/https)
             formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-            // Negrito **texto**
             formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Italico *texto*
             formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            // Quebras de linha
             formatted = formatted.replace(/\n/g, '<br>');
-            // Mencoes de canal <#id>
-            formatted = formatted.replace(/<#(\d+)>/g, '<span style="color:#8f7bc2">#canal</span>');
+            formatted = formatted.replace(/<#(\d+)>/g, '<span style="color:#8f7bc2; background:#2a2a35; padding:0 4px; border-radius:6px;">🔗 #canal</span>');
             return formatted;
         }
 
-        // Atualizar preview ao vivo
+        // Atualizar preview completo
         function updatePreview() {
-            // Titulo
-            previewTitle.textContent = titleInput.value || 'Sem titulo';
-            
-            // Descricao
+            previewTitle.textContent = titleInput.value.trim() || "Sem título";
             previewDesc.innerHTML = formatMarkdown(descInput.value);
             
-            // Cor da borda
             const hexColor = colorHex.value;
-            if (/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
+            if (/^#[0-9A-Fa-f]{6}$/i.test(hexColor)) {
                 embedCard.style.borderLeftColor = hexColor;
+            } else if (/^#[0-9A-Fa-f]{3}$/i.test(hexColor)) {
+                // conversão simples de 3 dígitos para preview
+                let expanded = '#' + hexColor[1]+hexColor[1]+hexColor[2]+hexColor[2]+hexColor[3]+hexColor[3];
+                embedCard.style.borderLeftColor = expanded;
             }
             
-            // Imagem principal
-            const imageUrl = imageInput.value.trim();
-            if (imageUrl) {
+            // imagem principal
+            const imgUrl = imageInput.value.trim();
+            if (imgUrl) {
                 previewImageContainer.style.display = 'block';
-                previewImageContainer.innerHTML = `<img src="${imageUrl}" alt="Embed image" onerror="this.src='https://placehold.co/600x200/1a1a1f/5a4b8c?text=Imagem+invalida'">`;
+                previewImageContainer.innerHTML = `<img src="${imgUrl}" alt="Embed image" onerror="this.onerror=null; this.src='https://placehold.co/600x200/1a1a1f/5a4b8c?text=Imagem+inválida';">`;
             } else {
                 previewImageContainer.style.display = 'none';
                 previewImageContainer.innerHTML = '';
             }
             
-            // Thumbnail
-            const thumbnailUrl = thumbnailInput.value.trim();
-            if (thumbnailUrl) {
+            // thumbnail
+            const thumbUrl = thumbnailInput.value.trim();
+            if (thumbUrl) {
                 previewThumbnailContainer.style.display = 'flex';
-                previewThumbnailContainer.innerHTML = `<img src="${thumbnailUrl}" alt="Thumbnail" onerror="this.style.display='none'">`;
+                previewThumbnailContainer.innerHTML = `<img src="${thumbUrl}" alt="Thumbnail" onerror="this.style.display='none'">`;
             } else {
                 previewThumbnailContainer.style.display = 'none';
                 previewThumbnailContainer.innerHTML = '';
             }
             
-            // Footer
-            const footerText = footerTextInput.value.trim();
-            const footerIcon = footerIconInput.value.trim();
-            if (footerText || footerIcon) {
+            // footer
+            const footText = footerTextInput.value.trim();
+            const footIcon = footerIconInput.value.trim();
+            if (footText || footIcon) {
                 previewFooter.style.display = 'flex';
                 let footerHtml = '';
-                if (footerIcon) {
-                    footerHtml += `<img src="${footerIcon}" alt="Footer icon" onerror="this.style.display='none'">`;
-                }
-                if (footerText) {
-                    footerHtml += `<span>${footerText}</span>`;
-                }
+                if (footIcon) footerHtml += `<img src="${footIcon}" alt="footer icon" onerror="this.style.display='none'">`;
+                if (footText) footerHtml += `<span>${footText}</span>`;
                 previewFooter.innerHTML = footerHtml;
             } else {
                 previewFooter.style.display = 'none';
@@ -509,33 +567,27 @@ eclipsemcc.com.br</textarea>
             }
         }
 
-        // Gerar JSON completo
-        function generateJSON() {
+        // Gerar objeto embed + JSON completo (com components dinâmicos, mas preservando os botões originais do exemplo)
+        function generateFullEmbedObject() {
             const embed = {
-                title: titleInput.value,
-                description: descInput.value,
+                title: titleInput.value || "Embed sem título",
+                description: descInput.value || "",
                 color: hexToDecimal(colorHex.value)
             };
-            
-            const imageUrl = imageInput.value.trim();
-            if (imageUrl) {
-                embed.image = { url: imageUrl };
-            }
-            
-            const thumbnailUrl = thumbnailInput.value.trim();
-            if (thumbnailUrl) {
-                embed.thumbnail = { url: thumbnailUrl };
-            }
-            
-            const footerText = footerTextInput.value.trim();
-            const footerIcon = footerIconInput.value.trim();
-            if (footerText || footerIcon) {
+            if (imageInput.value.trim()) embed.image = { url: imageInput.value.trim() };
+            if (thumbnailInput.value.trim()) embed.thumbnail = { url: thumbnailInput.value.trim() };
+            if (footerTextInput.value.trim() || footerIconInput.value.trim()) {
                 embed.footer = {};
-                if (footerText) embed.footer.text = footerText;
-                if (footerIcon) embed.footer.icon_url = footerIcon;
+                if (footerTextInput.value.trim()) embed.footer.text = footerTextInput.value.trim();
+                if (footerIconInput.value.trim()) embed.footer.icon_url = footerIconInput.value.trim();
             }
-            
-            const json = {
+            return embed;
+        }
+
+        function generateJSON() {
+            const embed = generateFullEmbedObject();
+            // mantém os botões de exemplo (PC, Mobile, Ticket) igual à proposta original, mas dinâmico
+            const jsonStructure = {
                 content: "",
                 embeds: [embed],
                 components: [
@@ -549,31 +601,97 @@ eclipsemcc.com.br</textarea>
                     }
                 ]
             };
-            
-            return JSON.stringify(json, null, 2);
+            return JSON.stringify(jsonStructure, null, 2);
         }
 
-        // Copiar JSON
-        async function copyJSON() {
-            const json = generateJSON();
+        // Carregar JSON externo e preencher formulário (editável)
+        function loadFromJSON(jsonString) {
             try {
-                await navigator.clipboard.writeText(json);
-                showToast('JSON copiado com sucesso');
+                let parsed = JSON.parse(jsonString);
+                // Suporta tanto { "embeds": [...] } quanto objeto direto com embed
+                let embedData = null;
+                if (parsed.embeds && Array.isArray(parsed.embeds) && parsed.embeds.length > 0) {
+                    embedData = parsed.embeds[0];
+                } else if (parsed.title || parsed.description) {
+                    embedData = parsed;
+                } else {
+                    throw new Error("JSON inválido: não contém um embed reconhecível.");
+                }
+                
+                // Preencher campos
+                if (embedData.title !== undefined) titleInput.value = embedData.title || '';
+                if (embedData.description !== undefined) descInput.value = embedData.description || '';
+                
+                // Cor (hex) - pode vir como número decimal ou string
+                if (embedData.color !== undefined) {
+                    let colorNumber = parseInt(embedData.color);
+                    if (!isNaN(colorNumber)) {
+                        let hexColor = decimalToHex(colorNumber);
+                        colorPicker.value = hexColor;
+                        colorHex.value = hexColor;
+                    } else if (typeof embedData.color === 'string' && embedData.color.startsWith('#')) {
+                        colorPicker.value = embedData.color;
+                        colorHex.value = embedData.color;
+                    }
+                }
+                
+                if (embedData.image && embedData.image.url) imageInput.value = embedData.image.url;
+                else if (embedData.image && typeof embedData.image === 'string') imageInput.value = embedData.image;
+                else imageInput.value = '';
+                
+                if (embedData.thumbnail && embedData.thumbnail.url) thumbnailInput.value = embedData.thumbnail.url;
+                else if (embedData.thumbnail && typeof embedData.thumbnail === 'string') thumbnailInput.value = embedData.thumbnail;
+                else thumbnailInput.value = '';
+                
+                if (embedData.footer) {
+                    if (embedData.footer.text !== undefined) footerTextInput.value = embedData.footer.text;
+                    if (embedData.footer.icon_url !== undefined) footerIconInput.value = embedData.footer.icon_url;
+                } else {
+                    footerTextInput.value = '';
+                    footerIconInput.value = '';
+                }
+                
+                updatePreview();
+                showToast("✅ JSON carregado com sucesso! Agora você pode editar os campos livremente.", "#6fcf97");
             } catch (err) {
-                showToast('Erro ao copiar', 'error');
+                showToast(`❌ Erro ao carregar JSON: ${err.message}`, "#e74c3c");
+                console.error(err);
             }
         }
 
-        // Mostrar notificacao
-        function showToast(message, type = 'success') {
+        // Função para exportar o JSON atual (baixar arquivo)
+        function downloadCurrentJSON() {
+            const jsonContent = generateJSON();
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `embed_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("📁 JSON exportado como arquivo");
+        }
+
+        function copyJSON() {
+            const json = generateJSON();
+            navigator.clipboard.writeText(json).then(() => {
+                showToast("📋 JSON copiado para a área de transferência!");
+            }).catch(() => {
+                showToast("Falha ao copiar", "#e74c3c");
+            });
+        }
+
+        function showToast(message, borderColorHex = '#5a4b8c') {
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = message;
+            toast.style.borderLeftColor = borderColorHex;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(() => toast.remove(), 2800);
         }
 
-        // Resetar valores padrao
         function resetDefaults() {
             titleInput.value = 'Downloads EclipseMC';
             descInput.value = '**PC** – Clique aqui para baixar\nhttps://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe\n\n**Mobile** – Clique aqui para baixar\nhttps://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk\n\n**Duvidas?** Abra ticket em <#1502708446443737321>\n\neclipsemcc.com.br';
@@ -584,65 +702,90 @@ eclipsemcc.com.br</textarea>
             footerTextInput.value = 'EclipseMC';
             footerIconInput.value = '';
             updatePreview();
-            showToast('Valores resetados');
+            showToast("🔄 Resetado para valores padrão");
         }
 
-        // Enviar para webhook
         async function sendToWebhook() {
-            const webhookUrl = prompt('Cole a URL do webhook do Discord:');
+            const webhookUrl = prompt('🔗 Cole a URL do webhook do Discord (começa com https://discord.com/api/webhooks/):');
             if (!webhookUrl) return;
-            
             if (!webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
-                showToast('URL de webhook invalida', 'error');
+                showToast("URL inválida! Deve ser um webhook do Discord.", "#e74c3c");
                 return;
             }
-            
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: generateJSON()
                 });
-                
                 if (response.ok) {
-                    showToast('Embed enviado com sucesso');
+                    showToast("✅ Embed enviado com sucesso para o Discord!");
                 } else {
-                    showToast('Erro ao enviar', 'error');
+                    const errorText = await response.text();
+                    showToast(`Erro ${response.status}: ${errorText.substring(0, 100)}`, "#e74c3c");
                 }
             } catch (err) {
-                showToast('Erro de conexao', 'error');
+                showToast("❌ Falha de conexão ou CORS", "#e74c3c");
             }
         }
 
-        // Eventos
+        // Eventos dos inputs
         titleInput.addEventListener('input', updatePreview);
         descInput.addEventListener('input', updatePreview);
         imageInput.addEventListener('input', updatePreview);
         thumbnailInput.addEventListener('input', updatePreview);
         footerTextInput.addEventListener('input', updatePreview);
         footerIconInput.addEventListener('input', updatePreview);
-        
         colorPicker.addEventListener('input', (e) => {
             colorHex.value = e.target.value;
             updatePreview();
         });
-        
         colorHex.addEventListener('input', (e) => {
             let val = e.target.value;
             if (!val.startsWith('#')) val = '#' + val;
             if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
                 colorPicker.value = val;
                 updatePreview();
-            } else if (val.length <= 7) {
+            } else if (/^#[0-9A-Fa-f]{3}$/i.test(val)) {
+                let expanded = '#' + val[1]+val[1]+val[2]+val[2]+val[3]+val[3];
+                colorPicker.value = expanded;
                 updatePreview();
+            } else {
+                updatePreview(); // mantém preview sem crash
             }
         });
         
         document.getElementById('copyBtn').addEventListener('click', copyJSON);
         document.getElementById('resetBtn').addEventListener('click', resetDefaults);
         document.getElementById('webhookBtn').addEventListener('click', sendToWebhook);
+        exportJsonBtn.addEventListener('click', () => {
+            const json = generateJSON();
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `embed_export.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("💾 JSON exportado (baixado)");
+        });
+        downloadJsonBtn.addEventListener('click', downloadCurrentJSON);
         
-        // Inicializar preview
+        // NOVO: Carregar JSON do textarea
+        loadJsonBtn.addEventListener('click', () => {
+            const rawJson = jsonLoaderInput.value.trim();
+            if (!rawJson) {
+                showToast("⚠️ Cole um JSON no campo acima primeiro!", "#f39c12");
+                return;
+            }
+            loadFromJSON(rawJson);
+        });
+        
+        clearJsonLoaderBtn.addEventListener('click', () => {
+            jsonLoaderInput.value = '';
+            showToast("🧹 Campo de JSON limpo");
+        });
+        
         updatePreview();
     </script>
 </body>
