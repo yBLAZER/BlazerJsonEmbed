@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Embed Studio Pro - Discord JSON Editor</title>
+    <title>Aurora Embed | Discord JSON Studio</title>
     <style>
         * {
             margin: 0;
@@ -12,49 +12,109 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f0f13;
-            color: #e1e1e6;
-            line-height: 1.5;
-        }
-
-        .app {
-            display: flex;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #05050a;
+            color: #ededf5;
+            line-height: 1.45;
             min-height: 100vh;
+            position: relative;
         }
 
-        /* Sidebar - Painel de controle */
-        .sidebar {
-            width: 400px;
-            background: #1a1a1f;
-            border-right: 1px solid #2a2a30;
-            padding: 32px 24px;
+        /* Efeito aurora boreal sutil, sem lag (uso de gradientes suaves e blur) */
+        .aurora-bg {
             position: fixed;
-            height: 100vh;
-            overflow-y: auto;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(ellipse at 40% 45%, #0a0718 0%, #020105 100%);
+        }
+
+        .aurora-bg::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background: radial-gradient(circle at 20% 30%, rgba(110, 60, 220, 0.12), transparent 55%),
+                        radial-gradient(circle at 85% 70%, rgba(160, 80, 220, 0.1), transparent 60%),
+                        repeating-linear-gradient(45deg, rgba(90, 50, 160, 0.02) 0px, rgba(90, 50, 160, 0.02) 2px, transparent 2px, transparent 8px);
+            filter: blur(48px);
+            animation: auroraMove 24s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .aurora-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -15%;
+            right: -10%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(ellipse at 70% 80%, rgba(120, 70, 210, 0.08), transparent 65%);
+            filter: blur(70px);
+            animation: auroraGlow 18s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes auroraMove {
+            0% { transform: translate(0%, 0%) rotate(0deg); opacity: 0.6; }
+            100% { transform: translate(3%, 2%) rotate(2deg); opacity: 1; }
+        }
+        @keyframes auroraGlow {
+            0% { opacity: 0.3; transform: scale(1);}
+            100% { opacity: 0.7; transform: scale(1.1);}
+        }
+
+        /* layout principal - mais organizado e fluido */
+        .app {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 28px;
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* sidebar escura com vidro fosco */
+        .sidebar {
+            flex: 1.2;
+            background: rgba(18, 18, 28, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            border: 1px solid rgba(120, 80, 200, 0.25);
+            padding: 28px 28px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
         }
 
         .sidebar h1 {
-            font-size: 1.35rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #c0b5f0, #8f7bc2);
+            font-size: 1.9rem;
+            font-weight: 620;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #dddaff, #b7a6f0);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            margin-bottom: 6px;
         }
 
-        .sidebar .subtitle {
+        .badge-sub {
             font-size: 0.8rem;
-            color: #8a8a96;
+            color: #b9c3db;
+            border-left: 3px solid #a085ff;
+            padding-left: 14px;
+            margin-top: 4px;
             margin-bottom: 28px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #2a2a30;
+            font-weight: 420;
         }
 
         .field-group {
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .field-group label {
@@ -63,36 +123,28 @@
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #8a8a96;
+            color: #bfb9e6;
             margin-bottom: 8px;
         }
 
         .field-group input,
-        .field-group textarea,
-        .field-group select {
+        .field-group textarea {
             width: 100%;
-            padding: 12px 14px;
-            background: #0f0f13;
-            border: 1px solid #2a2a30;
-            border-radius: 10px;
-            color: #e1e1e6;
+            padding: 12px 16px;
+            background: #0d0d14;
+            border: 1px solid #2a2540;
+            border-radius: 20px;
+            color: #f0edff;
             font-size: 0.85rem;
-            font-family: 'Inter', monospace;
+            font-family: 'Inter', 'SF Mono', monospace;
             transition: all 0.2s ease;
         }
 
         .field-group input:focus,
         .field-group textarea:focus {
             outline: none;
-            border-color: #7c6bb3;
-            box-shadow: 0 0 0 3px rgba(124, 107, 179, 0.2);
-        }
-
-        .field-group textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: inherit;
-            line-height: 1.5;
+            border-color: #a88bff;
+            box-shadow: 0 0 0 3px rgba(138, 98, 255, 0.2);
         }
 
         .color-row {
@@ -102,112 +154,136 @@
         }
 
         .color-row input[type="color"] {
-            width: 52px;
-            height: 44px;
-            padding: 4px;
-            background: #0f0f13;
-            border-radius: 10px;
+            width: 56px;
+            height: 46px;
+            background: #0f0f18;
+            border: 1px solid #35304e;
+            border-radius: 18px;
             cursor: pointer;
-            border: 1px solid #2a2a30;
         }
 
-        .color-row input[type="text"] {
-            flex: 1;
+        /* area de carregamento de JSON - igual aos outros campos (caixa de mensagem) */
+        .json-import-area {
+            background: rgba(13, 13, 20, 0.7);
+            border-radius: 24px;
+            padding: 8px 0px 0px 0px;
+            margin-bottom: 28px;
+            border: none;
+        }
+
+        .json-import-area label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #bfb9e6;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .json-import-area textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0d0d14;
+            border: 1px solid #2a2540;
+            border-radius: 20px;
+            color: #f0edff;
+            font-size: 0.8rem;
             font-family: 'SF Mono', monospace;
-            font-size: 0.85rem;
+            min-height: 105px;
+            resize: vertical;
+        }
+
+        .flex-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        /* botoes gerais sem emojis e minimalistas */
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 550;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            background: #1e1a2f;
+            color: #e2dcff;
+            border: 1px solid #35304e;
+        }
+
+        .btn-primary {
+            background: #6c55cc;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(98, 70, 200, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #816be2;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #1e1a2f;
+            border: 1px solid #3c3560;
+        }
+
+        .btn-secondary:hover {
+            background: #2c2648;
         }
 
         .button-group {
             display: flex;
             gap: 12px;
             margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid #2a2a30;
+            padding-top: 18px;
+            border-top: 1px solid #2a254a;
             flex-wrap: wrap;
         }
 
-        .btn {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: #5a4b8c;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #6b5a9e;
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: #2a2a30;
-            color: #e1e1e6;
-        }
-
-        .btn-secondary:hover {
-            background: #3a3a42;
-        }
-
-        .btn-accent {
-            background: #1e3a4d;
-            color: #9ad7f5;
-            border: 1px solid #2e577a;
-        }
-
-        .btn-accent:hover {
-            background: #2a4c64;
-        }
-
-        .btn-warning {
-            background: #4a2e2e;
-            color: #ffaaaa;
-        }
-
-        .btn-warning:hover {
-            background: #5e3a3a;
-        }
-
+        /* preview area */
         .preview-area {
-            margin-left: 400px;
-            flex: 1;
-            padding: 48px 40px;
-            background: #0a0a0c;
-            min-height: 100vh;
+            flex: 1.4;
+            background: rgba(12, 12, 22, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 32px;
+            border: 1px solid rgba(110, 80, 200, 0.3);
+            padding: 28px 30px;
         }
 
         .preview-header {
-            margin-bottom: 28px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #2a2645;
         }
 
         .preview-header h2 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
-            color: #8a8a96;
-        }
-
-        .preview-header h2 span {
-            color: #8f7bc2;
-            font-family: monospace;
+            color: #cbc6f0;
+            letter-spacing: -0.2px;
         }
 
         .embed-card {
             max-width: 540px;
-            background: #1e1e22;
-            border-radius: 12px;
+            background: #111117;
+            border-radius: 24px;
             overflow: hidden;
-            border-left: 4px solid #5a4b8c;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            transition: border 0.1s ease;
+            border-left: 4px solid #8f74f0;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+            transition: border 0.1s;
         }
 
         .embed-body {
@@ -216,40 +292,33 @@
 
         .embed-title {
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 620;
             color: #ffffff;
             margin-bottom: 12px;
-            line-height: 1.4;
         }
 
         .embed-description {
             font-size: 0.85rem;
-            color: #c4c4cc;
+            color: #cfd9f0;
             line-height: 1.6;
             white-space: pre-wrap;
-            word-break: break-word;
         }
 
         .embed-description a {
-            color: #8f7bc2;
+            color: #b19cff;
             text-decoration: none;
-        }
-
-        .embed-description a:hover {
-            text-decoration: underline;
         }
 
         .embed-image {
             margin-top: 16px;
-            border-radius: 8px;
+            border-radius: 18px;
             overflow: hidden;
         }
 
         .embed-image img {
             width: 100%;
-            max-height: 280px;
+            max-height: 240px;
             object-fit: cover;
-            display: block;
         }
 
         .embed-thumbnail {
@@ -261,19 +330,20 @@
         .embed-thumbnail img {
             width: 72px;
             height: 72px;
-            border-radius: 8px;
+            border-radius: 16px;
             object-fit: cover;
+            border: 1px solid #2e2a48;
         }
 
         .embed-footer {
-            margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid #2e2e35;
+            margin-top: 18px;
+            padding-top: 10px;
+            border-top: 1px solid #26223f;
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.7rem;
-            color: #8a8a96;
+            color: #aca9dd;
         }
 
         .embed-footer img {
@@ -292,501 +362,433 @@
         .toast {
             position: fixed;
             bottom: 24px;
-            right: 24px;
-            background: #2a2a30;
-            border-left: 3px solid #5a4b8c;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: #e1e1e6;
-            font-size: 0.85rem;
-            animation: fadeInUp 0.3s ease;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .sidebar::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .sidebar::-webkit-scrollbar-track {
-            background: #1a1a1f;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #3a3a42;
-            border-radius: 10px;
+            right: 28px;
+            background: #1e1a2f;
+            backdrop-filter: blur(12px);
+            border-left: 3px solid #a889ff;
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: #f0ebff;
+            font-size: 0.8rem;
+            z-index: 1100;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            font-weight: 460;
         }
 
         .hint {
-            font-size: 0.7rem;
-            color: #7a6aae;
+            font-size: 0.65rem;
+            color: #9d9ad0;
             margin-top: 6px;
             display: block;
         }
 
         hr {
             border: none;
-            border-top: 1px solid #2a2a30;
-            margin: 12px 0;
+            border-top: 1px solid #302c4a;
+            margin: 16px 0;
         }
 
-        .json-import-area {
-            background: #0f0f13;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 24px;
-            border: 1px dashed #3a3a48;
-        }
-
-        .json-import-area textarea {
-            font-size: 0.75rem;
-            font-family: 'SF Mono', monospace;
-            min-height: 100px;
-            background: #0a0a0e;
-        }
-
-        .flex-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .btn-small {
-            flex: 1;
-            padding: 8px 12px;
+        .footer-credits {
+            margin-top: 30px;
             font-size: 0.7rem;
+            text-align: center;
+            color: #7c77a2;
+            border-top: 1px solid #282546;
+            padding-top: 18px;
+        }
+
+        @media (max-width: 880px) {
+            .app {
+                flex-direction: column;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="sidebar">
-            <h1>🎨 Embed Studio Pro</h1>
-            <div class="subtitle">Crie, edite e carregue JSONs prontos</div>
+<div class="aurora-bg"></div>
+<div class="app">
+    <!-- sidebar com visual escuro/roxo -->
+    <div class="sidebar">
+        <h1>Embed Blazer</h1>
+        <div class="badge-sub">Ferramenta visual para criar embeds personalizados para Discord de forma simples e rápida.</div>
 
-            <!-- NOVO: Painel para carregar JSON existente -->
-            <div class="json-import-area">
-                <label style="font-size:0.75rem; font-weight:600;">📂 Carregar JSON existente</label>
-                <textarea id="jsonLoaderInput" placeholder='Cole aqui o JSON do embed (formato Discord) ... Exemplo: {"embeds": [{"title": "Olá", "description": "Mundo"}]}'></textarea>
-                <div class="flex-buttons">
-                    <button id="loadJsonBtn" class="btn btn-accent btn-small">🔁 Carregar & Editar</button>
-                    <button id="clearJsonLoaderBtn" class="btn btn-warning btn-small">🗑️ Limpar</button>
-                </div>
-                <span class="hint">⬆ Cole qualquer JSON compatível com Discord (embed) e clique em "Carregar & Editar" para preencher os campos e editar livremente.</span>
+        <!-- Caixa de carregamento JSON do mesmo estilo dos outros campos -->
+        <div class="json-import-area">
+            <label>Carregar JSON existente</label>
+            <textarea id="jsonLoaderInput" placeholder='Cole aqui o JSON do embed (formato Discord) ... Exemplo: {"embeds": [{"title": "Bem-vindo", "description": "Servidor incrivel"}]}'></textarea>
+            <div class="flex-buttons">
+                <button id="loadJsonBtn" class="btn btn-small btn-secondary">Carregar e editar</button>
+                <button id="clearJsonLoaderBtn" class="btn btn-small btn-secondary">Limpar</button>
             </div>
+            <span class="hint">Importe qualquer embed JSON existente e edite livremente todos os campos.</span>
+        </div>
 
-            <hr>
+        <div class="field-group">
+            <label>Titulo</label>
+            <input type="text" id="titleInput" placeholder="Digite o titulo do embed" value="Meu Servidor">
+        </div>
 
-            <div class="field-group">
-                <label>📌 Titulo</label>
-                <input type="text" id="titleInput" placeholder="Digite o titulo do embed" value="Downloads EclipseMC">
-            </div>
+        <div class="field-group">
+            <label>Descricao</label>
+            <textarea id="descInput" placeholder="Use **negrito**, *italico*, links e quebras de linha">Bem-vindo ao servidor.
+Explore os canais e divirta-se.
+**Regras** disponiveis em #regras</textarea>
+        </div>
 
-            <div class="field-group">
-                <label>📝 Descricao</label>
-                <textarea id="descInput" placeholder="Digite a descricao... (suporta **negrito**, *italico*, links e quebras de linha)">**PC** – Clique aqui para baixar
-https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe
-
-**Mobile** – Clique aqui para baixar
-https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk
-
-**Duvidas?** Abra ticket em <#1502708446443737321>
-
-eclipsemcc.com.br</textarea>
-            </div>
-
-            <div class="field-group">
-                <label>🎨 Cor do embed</label>
-                <div class="color-row">
-                    <input type="color" id="colorPicker" value="#5a4b8c">
-                    <input type="text" id="colorHex" value="#5a4b8c" placeholder="#5a4b8c">
-                </div>
-            </div>
-
-            <div class="field-group">
-                <label>🖼️ Imagem principal (banner)</label>
-                <input type="text" id="imageInput" placeholder="URL da imagem" value="https://cdn.discordapp.com/attachments/1502104075724914878/1502104233254846514/Gemini_Generated_Image_yt6llhyt6llhyt6l.png">
-                <span class="hint">Imagem grande dentro do embed</span>
-            </div>
-
-            <div class="field-group">
-                <label>🖼️ Thumbnail (icone pequeno)</label>
-                <input type="text" id="thumbnailInput" placeholder="URL da thumbnail (opcional)">
-                <span class="hint">Canto superior direito</span>
-            </div>
-
-            <div class="field-group">
-                <label>📌 Footer (rodape)</label>
-                <input type="text" id="footerTextInput" placeholder="Texto do rodape" value="EclipseMC">
-            </div>
-
-            <div class="field-group">
-                <label>🔗 Icone do footer</label>
-                <input type="text" id="footerIconInput" placeholder="URL do icone (opcional)">
-            </div>
-
-            <div class="button-group">
-                <button class="btn btn-primary" id="copyBtn">📋 Copiar JSON</button>
-                <button class="btn btn-secondary" id="resetBtn">🔄 Resetar Padrão</button>
-                <button class="btn btn-accent" id="exportJsonBtn">💾 Exportar JSON</button>
+        <div class="field-group">
+            <label>Cor do embed</label>
+            <div class="color-row">
+                <input type="color" id="colorPicker" value="#8f74f0">
+                <input type="text" id="colorHex" value="#8f74f0" placeholder="#8f74f0">
             </div>
         </div>
 
-        <div class="preview-area">
-            <div class="preview-header">
-                <h2>👁️ Preview <span>ao vivo</span> — visualização exata do embed</h2>
-            </div>
+        <div class="field-group">
+            <label>Imagem principal (banner)</label>
+            <input type="text" id="imageInput" placeholder="URL da imagem" value="https://i.imgur.com/DnRhPw9.png">
+            <span class="hint">Imagem grande dentro do embed</span>
+        </div>
 
-            <div class="embed-card" id="embedPreview">
-                <div class="embed-body">
-                    <div class="embed-title" id="previewTitle">Downloads EclipseMC</div>
-                    <div class="embed-description" id="previewDesc"></div>
-                    <div class="embed-image" id="previewImageContainer" style="display: none;"></div>
-                    <div class="embed-thumbnail" id="previewThumbnailContainer" style="display: none;"></div>
-                    <div class="embed-footer" id="previewFooter" style="display: none;"></div>
-                </div>
-            </div>
+        <div class="field-group">
+            <label>Thumbnail (icone pequeno)</label>
+            <input type="text" id="thumbnailInput" placeholder="URL da thumbnail (opcional)">
+            <span class="hint">Canto superior direito</span>
+        </div>
 
-            <div class="preview-actions">
-                <button class="btn btn-secondary" id="webhookBtn">📡 Enviar para webhook</button>
-                <button class="btn btn-secondary" id="downloadJsonBtn">⬇️ Baixar JSON</button>
-            </div>
-            <div class="hint" style="margin-top: 16px;">✅ O botão "Carregar & Editar" aceita JSONs com ou sem components, extrai título, descrição, cor, imagens, footer e thumbnail para você editar livremente!</div>
+        <div class="field-group">
+            <label>Footer (rodape)</label>
+            <input type="text" id="footerTextInput" placeholder="Texto do rodape" value="yBlazer">
+        </div>
+
+        <div class="field-group">
+            <label>Icone do footer</label>
+            <input type="text" id="footerIconInput" placeholder="URL do icone (opcional)">
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" id="copyBtn">Copiar JSON</button>
+            <button class="btn btn-secondary" id="resetBtn">Resetar padrao</button>
+            <button class="btn btn-secondary" id="exportJsonBtn">Exportar JSON</button>
+        </div>
+        <div class="footer-credits">
+            Desenvolvido por yBlazer · visual aurora
         </div>
     </div>
 
-    <script>
-        // Elementos DOM
-        const titleInput = document.getElementById('titleInput');
-        const descInput = document.getElementById('descInput');
-        const colorPicker = document.getElementById('colorPicker');
-        const colorHex = document.getElementById('colorHex');
-        const imageInput = document.getElementById('imageInput');
-        const thumbnailInput = document.getElementById('thumbnailInput');
-        const footerTextInput = document.getElementById('footerTextInput');
-        const footerIconInput = document.getElementById('footerIconInput');
-        
-        const previewTitle = document.getElementById('previewTitle');
-        const previewDesc = document.getElementById('previewDesc');
-        const previewImageContainer = document.getElementById('previewImageContainer');
-        const previewThumbnailContainer = document.getElementById('previewThumbnailContainer');
-        const previewFooter = document.getElementById('previewFooter');
-        const embedCard = document.getElementById('embedPreview');
+    <!-- preview area -->
+    <div class="preview-area">
+        <div class="preview-header">
+            <h2>Visualizacao ao vivo — embed exato</h2>
+        </div>
+        <div class="embed-card" id="embedPreview">
+            <div class="embed-body">
+                <div class="embed-title" id="previewTitle">Meu Servidor</div>
+                <div class="embed-description" id="previewDesc"></div>
+                <div class="embed-image" id="previewImageContainer" style="display: none;"></div>
+                <div class="embed-thumbnail" id="previewThumbnailContainer" style="display: none;"></div>
+                <div class="embed-footer" id="previewFooter" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="preview-actions">
+            <button class="btn btn-secondary" id="webhookBtn">Enviar para webhook</button>
+            <button class="btn btn-secondary" id="downloadJsonBtn">Baixar JSON</button>
+        </div>
+        <div class="hint" style="margin-top: 20px;">Os botoes interativos (PC, Mobile, Ticket) sao adicionados automaticamente no JSON final.</div>
+    </div>
+</div>
 
-        // Loader JSON textarea
-        const jsonLoaderInput = document.getElementById('jsonLoaderInput');
-        const loadJsonBtn = document.getElementById('loadJsonBtn');
-        const clearJsonLoaderBtn = document.getElementById('clearJsonLoaderBtn');
-        const exportJsonBtn = document.getElementById('exportJsonBtn');
-        const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+<script>
+    // elementos do DOM
+    const titleInput = document.getElementById('titleInput');
+    const descInput = document.getElementById('descInput');
+    const colorPicker = document.getElementById('colorPicker');
+    const colorHex = document.getElementById('colorHex');
+    const imageInput = document.getElementById('imageInput');
+    const thumbnailInput = document.getElementById('thumbnailInput');
+    const footerTextInput = document.getElementById('footerTextInput');
+    const footerIconInput = document.getElementById('footerIconInput');
 
-        // Helper: hex -> decimal
-        function hexToDecimal(hex) {
-            let clean = hex.replace('#', '');
-            if (clean.length === 3) clean = clean.split('').map(c => c+c).join('');
-            if (!/^[0-9A-Fa-f]{6}$/.test(clean)) return 0x5a4b8c;
-            return parseInt(clean, 16);
+    const previewTitle = document.getElementById('previewTitle');
+    const previewDesc = document.getElementById('previewDesc');
+    const previewImageContainer = document.getElementById('previewImageContainer');
+    const previewThumbnailContainer = document.getElementById('previewThumbnailContainer');
+    const previewFooter = document.getElementById('previewFooter');
+    const embedCard = document.getElementById('embedPreview');
+
+    const jsonLoaderInput = document.getElementById('jsonLoaderInput');
+    const loadJsonBtn = document.getElementById('loadJsonBtn');
+    const clearJsonLoaderBtn = document.getElementById('clearJsonLoaderBtn');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+    const downloadJsonBtn = document.getElementById('downloadJsonBtn');
+
+    // helpers
+    function hexToDecimal(hex) {
+        let clean = hex.replace('#', '');
+        if (clean.length === 3) clean = clean.split('').map(c => c+c).join('');
+        if (!/^[0-9A-Fa-f]{6}$/.test(clean)) return 0x8f74f0;
+        return parseInt(clean, 16);
+    }
+
+    function decimalToHex(decimal) {
+        let hex = Number(decimal).toString(16).padStart(6, '0');
+        return `#${hex.slice(0,6)}`;
+    }
+
+    function formatMarkdown(text) {
+        if (!text) return '';
+        let formatted = text;
+        formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        formatted = formatted.replace(/\n/g, '<br>');
+        formatted = formatted.replace(/<#(\d+)>/g, '<span style="color:#b8a4ff; background:#1f1c34; padding:0 6px; border-radius:30px;">#canal</span>');
+        return formatted;
+    }
+
+    function updatePreview() {
+        previewTitle.textContent = titleInput.value.trim() || "Sem titulo";
+        previewDesc.innerHTML = formatMarkdown(descInput.value);
+
+        const hexColor = colorHex.value;
+        if (/^#[0-9A-Fa-f]{6}$/i.test(hexColor)) {
+            embedCard.style.borderLeftColor = hexColor;
+        } else if (/^#[0-9A-Fa-f]{3}$/i.test(hexColor)) {
+            let expanded = '#' + hexColor[1]+hexColor[1]+hexColor[2]+hexColor[2]+hexColor[3]+hexColor[3];
+            embedCard.style.borderLeftColor = expanded;
         }
 
-        // decimal -> hex string com #
-        function decimalToHex(decimal) {
-            let hex = Number(decimal).toString(16).padStart(6, '0');
-            return `#${hex.slice(0,6)}`;
+        const imgUrl = imageInput.value.trim();
+        if (imgUrl) {
+            previewImageContainer.style.display = 'block';
+            previewImageContainer.innerHTML = `<img src="${imgUrl}" alt="embed banner" onerror="this.onerror=null; this.src='https://placehold.co/600x200/1e1a2f/8f74f0?text=imagem+falhou';">`;
+        } else {
+            previewImageContainer.style.display = 'none';
+            previewImageContainer.innerHTML = '';
         }
 
-        // formatação markdown simples para preview
-        function formatMarkdown(text) {
-            if (!text) return '';
-            let formatted = text;
-            formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-            formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-            formatted = formatted.replace(/\n/g, '<br>');
-            formatted = formatted.replace(/<#(\d+)>/g, '<span style="color:#8f7bc2; background:#2a2a35; padding:0 4px; border-radius:6px;">🔗 #canal</span>');
-            return formatted;
+        const thumbUrl = thumbnailInput.value.trim();
+        if (thumbUrl) {
+            previewThumbnailContainer.style.display = 'flex';
+            previewThumbnailContainer.innerHTML = `<img src="${thumbUrl}" alt="thumb" onerror="this.style.display='none'">`;
+        } else {
+            previewThumbnailContainer.style.display = 'none';
+            previewThumbnailContainer.innerHTML = '';
         }
 
-        // Atualizar preview completo
-        function updatePreview() {
-            previewTitle.textContent = titleInput.value.trim() || "Sem título";
-            previewDesc.innerHTML = formatMarkdown(descInput.value);
-            
-            const hexColor = colorHex.value;
-            if (/^#[0-9A-Fa-f]{6}$/i.test(hexColor)) {
-                embedCard.style.borderLeftColor = hexColor;
-            } else if (/^#[0-9A-Fa-f]{3}$/i.test(hexColor)) {
-                // conversão simples de 3 dígitos para preview
-                let expanded = '#' + hexColor[1]+hexColor[1]+hexColor[2]+hexColor[2]+hexColor[3]+hexColor[3];
-                embedCard.style.borderLeftColor = expanded;
-            }
-            
-            // imagem principal
-            const imgUrl = imageInput.value.trim();
-            if (imgUrl) {
-                previewImageContainer.style.display = 'block';
-                previewImageContainer.innerHTML = `<img src="${imgUrl}" alt="Embed image" onerror="this.onerror=null; this.src='https://placehold.co/600x200/1a1a1f/5a4b8c?text=Imagem+inválida';">`;
-            } else {
-                previewImageContainer.style.display = 'none';
-                previewImageContainer.innerHTML = '';
-            }
-            
-            // thumbnail
-            const thumbUrl = thumbnailInput.value.trim();
-            if (thumbUrl) {
-                previewThumbnailContainer.style.display = 'flex';
-                previewThumbnailContainer.innerHTML = `<img src="${thumbUrl}" alt="Thumbnail" onerror="this.style.display='none'">`;
-            } else {
-                previewThumbnailContainer.style.display = 'none';
-                previewThumbnailContainer.innerHTML = '';
-            }
-            
-            // footer
-            const footText = footerTextInput.value.trim();
-            const footIcon = footerIconInput.value.trim();
-            if (footText || footIcon) {
-                previewFooter.style.display = 'flex';
-                let footerHtml = '';
-                if (footIcon) footerHtml += `<img src="${footIcon}" alt="footer icon" onerror="this.style.display='none'">`;
-                if (footText) footerHtml += `<span>${footText}</span>`;
-                previewFooter.innerHTML = footerHtml;
-            } else {
-                previewFooter.style.display = 'none';
-                previewFooter.innerHTML = '';
-            }
+        const footText = footerTextInput.value.trim();
+        const footIcon = footerIconInput.value.trim();
+        if (footText || footIcon) {
+            previewFooter.style.display = 'flex';
+            let footerHtml = '';
+            if (footIcon) footerHtml += `<img src="${footIcon}" alt="footer icon" onerror="this.style.display='none'">`;
+            if (footText) footerHtml += `<span>${footText}</span>`;
+            previewFooter.innerHTML = footerHtml;
+        } else {
+            previewFooter.style.display = 'none';
+            previewFooter.innerHTML = '';
         }
+    }
 
-        // Gerar objeto embed + JSON completo (com components dinâmicos, mas preservando os botões originais do exemplo)
-        function generateFullEmbedObject() {
-            const embed = {
-                title: titleInput.value || "Embed sem título",
-                description: descInput.value || "",
-                color: hexToDecimal(colorHex.value)
-            };
-            if (imageInput.value.trim()) embed.image = { url: imageInput.value.trim() };
-            if (thumbnailInput.value.trim()) embed.thumbnail = { url: thumbnailInput.value.trim() };
-            if (footerTextInput.value.trim() || footerIconInput.value.trim()) {
-                embed.footer = {};
-                if (footerTextInput.value.trim()) embed.footer.text = footerTextInput.value.trim();
-                if (footerIconInput.value.trim()) embed.footer.icon_url = footerIconInput.value.trim();
-            }
-            return embed;
+    function generateFullEmbedObject() {
+        const embed = {
+            title: titleInput.value || "Embed sem titulo",
+            description: descInput.value || "",
+            color: hexToDecimal(colorHex.value)
+        };
+        if (imageInput.value.trim()) embed.image = { url: imageInput.value.trim() };
+        if (thumbnailInput.value.trim()) embed.thumbnail = { url: thumbnailInput.value.trim() };
+        if (footerTextInput.value.trim() || footerIconInput.value.trim()) {
+            embed.footer = {};
+            if (footerTextInput.value.trim()) embed.footer.text = footerTextInput.value.trim();
+            if (footerIconInput.value.trim()) embed.footer.icon_url = footerIconInput.value.trim();
         }
+        return embed;
+    }
 
-        function generateJSON() {
-            const embed = generateFullEmbedObject();
-            // mantém os botões de exemplo (PC, Mobile, Ticket) igual à proposta original, mas dinâmico
-            const jsonStructure = {
-                content: "",
-                embeds: [embed],
-                components: [
-                    {
-                        type: 1,
-                        components: [
-                            { type: 2, label: "PC", style: 5, url: "https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe?rlkey=4p3y0ifpvukd01pubg737a2nk&st=w0m9yjxu&dl=1" },
-                            { type: 2, label: "Mobile", style: 5, url: "https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk" },
-                            { type: 2, label: "Ticket", style: 5, url: "https://discord.com/channels/SEU_SERVIDOR_ID/1502708446443737321" }
-                        ]
-                    }
-                ]
-            };
-            return JSON.stringify(jsonStructure, null, 2);
-        }
-
-        // Carregar JSON externo e preencher formulário (editável)
-        function loadFromJSON(jsonString) {
-            try {
-                let parsed = JSON.parse(jsonString);
-                // Suporta tanto { "embeds": [...] } quanto objeto direto com embed
-                let embedData = null;
-                if (parsed.embeds && Array.isArray(parsed.embeds) && parsed.embeds.length > 0) {
-                    embedData = parsed.embeds[0];
-                } else if (parsed.title || parsed.description) {
-                    embedData = parsed;
-                } else {
-                    throw new Error("JSON inválido: não contém um embed reconhecível.");
+    function generateJSON() {
+        const embed = generateFullEmbedObject();
+        const jsonStructure = {
+            content: "",
+            embeds: [embed],
+            components: [
+                {
+                    type: 1,
+                    components: [
+                        { type: 2, label: "PC", style: 5, url: "https://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe?rlkey=4p3y0ifpvukd01pubg737a2nk&st=w0m9yjxu&dl=1" },
+                        { type: 2, label: "Mobile", style: 5, url: "https://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk" },
+                        { type: 2, label: "Ticket", style: 5, url: "https://discord.com/channels/SEU_SERVIDOR_ID/1502708446443737321" }
+                    ]
                 }
-                
-                // Preencher campos
-                if (embedData.title !== undefined) titleInput.value = embedData.title || '';
-                if (embedData.description !== undefined) descInput.value = embedData.description || '';
-                
-                // Cor (hex) - pode vir como número decimal ou string
-                if (embedData.color !== undefined) {
-                    let colorNumber = parseInt(embedData.color);
-                    if (!isNaN(colorNumber)) {
-                        let hexColor = decimalToHex(colorNumber);
-                        colorPicker.value = hexColor;
-                        colorHex.value = hexColor;
-                    } else if (typeof embedData.color === 'string' && embedData.color.startsWith('#')) {
-                        colorPicker.value = embedData.color;
-                        colorHex.value = embedData.color;
-                    }
-                }
-                
-                if (embedData.image && embedData.image.url) imageInput.value = embedData.image.url;
-                else if (embedData.image && typeof embedData.image === 'string') imageInput.value = embedData.image;
-                else imageInput.value = '';
-                
-                if (embedData.thumbnail && embedData.thumbnail.url) thumbnailInput.value = embedData.thumbnail.url;
-                else if (embedData.thumbnail && typeof embedData.thumbnail === 'string') thumbnailInput.value = embedData.thumbnail;
-                else thumbnailInput.value = '';
-                
-                if (embedData.footer) {
-                    if (embedData.footer.text !== undefined) footerTextInput.value = embedData.footer.text;
-                    if (embedData.footer.icon_url !== undefined) footerIconInput.value = embedData.footer.icon_url;
-                } else {
-                    footerTextInput.value = '';
-                    footerIconInput.value = '';
-                }
-                
-                updatePreview();
-                showToast("✅ JSON carregado com sucesso! Agora você pode editar os campos livremente.", "#6fcf97");
-            } catch (err) {
-                showToast(`❌ Erro ao carregar JSON: ${err.message}`, "#e74c3c");
-                console.error(err);
+            ]
+        };
+        return JSON.stringify(jsonStructure, null, 2);
+    }
+
+    function loadFromJSON(jsonString) {
+        try {
+            let parsed = JSON.parse(jsonString);
+            let embedData = null;
+            if (parsed.embeds && Array.isArray(parsed.embeds) && parsed.embeds.length > 0) {
+                embedData = parsed.embeds[0];
+            } else if (parsed.title || parsed.description) {
+                embedData = parsed;
+            } else {
+                throw new Error("JSON nao possui embed valido.");
             }
-        }
 
-        // Função para exportar o JSON atual (baixar arquivo)
-        function downloadCurrentJSON() {
-            const jsonContent = generateJSON();
-            const blob = new Blob([jsonContent], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `embed_${Date.now()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast("📁 JSON exportado como arquivo");
-        }
+            if (embedData.title !== undefined) titleInput.value = embedData.title || '';
+            if (embedData.description !== undefined) descInput.value = embedData.description || '';
 
-        function copyJSON() {
-            const json = generateJSON();
-            navigator.clipboard.writeText(json).then(() => {
-                showToast("📋 JSON copiado para a área de transferência!");
-            }).catch(() => {
-                showToast("Falha ao copiar", "#e74c3c");
-            });
-        }
+            if (embedData.color !== undefined) {
+                let colorNumber = parseInt(embedData.color);
+                if (!isNaN(colorNumber)) {
+                    let hexColor = decimalToHex(colorNumber);
+                    colorPicker.value = hexColor;
+                    colorHex.value = hexColor;
+                } else if (typeof embedData.color === 'string' && embedData.color.startsWith('#')) {
+                    colorPicker.value = embedData.color;
+                    colorHex.value = embedData.color;
+                }
+            }
 
-        function showToast(message, borderColorHex = '#5a4b8c') {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            toast.style.borderLeftColor = borderColorHex;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2800);
-        }
+            if (embedData.image && embedData.image.url) imageInput.value = embedData.image.url;
+            else if (embedData.image && typeof embedData.image === 'string') imageInput.value = embedData.image;
+            else imageInput.value = '';
 
-        function resetDefaults() {
-            titleInput.value = 'Downloads EclipseMC';
-            descInput.value = '**PC** – Clique aqui para baixar\nhttps://www.dropbox.com/scl/fi/hwa9r20bllqietwcv0c0s/EclipseMc-1.0.exe\n\n**Mobile** – Clique aqui para baixar\nhttps://cdn.nexusstudio.app/launchers-mobile/eclipse-mc/eclipse_mc-26.5.3.apk\n\n**Duvidas?** Abra ticket em <#1502708446443737321>\n\neclipsemcc.com.br';
-            colorPicker.value = '#5a4b8c';
-            colorHex.value = '#5a4b8c';
-            imageInput.value = 'https://cdn.discordapp.com/attachments/1502104075724914878/1502104233254846514/Gemini_Generated_Image_yt6llhyt6llhyt6l.png';
-            thumbnailInput.value = '';
-            footerTextInput.value = 'EclipseMC';
-            footerIconInput.value = '';
+            if (embedData.thumbnail && embedData.thumbnail.url) thumbnailInput.value = embedData.thumbnail.url;
+            else if (embedData.thumbnail && typeof embedData.thumbnail === 'string') thumbnailInput.value = embedData.thumbnail;
+            else thumbnailInput.value = '';
+
+            if (embedData.footer) {
+                if (embedData.footer.text !== undefined) footerTextInput.value = embedData.footer.text;
+                if (embedData.footer.icon_url !== undefined) footerIconInput.value = embedData.footer.icon_url;
+            } else {
+                footerTextInput.value = '';
+                footerIconInput.value = '';
+            }
             updatePreview();
-            showToast("🔄 Resetado para valores padrão");
+            showToast("JSON carregado. Agora voce pode editar todos os campos.");
+        } catch (err) {
+            showToast(`Erro: ${err.message}`, true);
         }
+    }
 
-        async function sendToWebhook() {
-            const webhookUrl = prompt('🔗 Cole a URL do webhook do Discord (começa com https://discord.com/api/webhooks/):');
-            if (!webhookUrl) return;
-            if (!webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
-                showToast("URL inválida! Deve ser um webhook do Discord.", "#e74c3c");
-                return;
-            }
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: generateJSON()
-                });
-                if (response.ok) {
-                    showToast("✅ Embed enviado com sucesso para o Discord!");
-                } else {
-                    const errorText = await response.text();
-                    showToast(`Erro ${response.status}: ${errorText.substring(0, 100)}`, "#e74c3c");
-                }
-            } catch (err) {
-                showToast("❌ Falha de conexão ou CORS", "#e74c3c");
-            }
-        }
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        if (isError) toast.style.borderLeftColor = '#f7a582';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2800);
+    }
 
-        // Eventos dos inputs
-        titleInput.addEventListener('input', updatePreview);
-        descInput.addEventListener('input', updatePreview);
-        imageInput.addEventListener('input', updatePreview);
-        thumbnailInput.addEventListener('input', updatePreview);
-        footerTextInput.addEventListener('input', updatePreview);
-        footerIconInput.addEventListener('input', updatePreview);
-        colorPicker.addEventListener('input', (e) => {
-            colorHex.value = e.target.value;
-            updatePreview();
-        });
-        colorHex.addEventListener('input', (e) => {
-            let val = e.target.value;
-            if (!val.startsWith('#')) val = '#' + val;
-            if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
-                colorPicker.value = val;
-                updatePreview();
-            } else if (/^#[0-9A-Fa-f]{3}$/i.test(val)) {
-                let expanded = '#' + val[1]+val[1]+val[2]+val[2]+val[3]+val[3];
-                colorPicker.value = expanded;
-                updatePreview();
-            } else {
-                updatePreview(); // mantém preview sem crash
-            }
-        });
-        
-        document.getElementById('copyBtn').addEventListener('click', copyJSON);
-        document.getElementById('resetBtn').addEventListener('click', resetDefaults);
-        document.getElementById('webhookBtn').addEventListener('click', sendToWebhook);
-        exportJsonBtn.addEventListener('click', () => {
-            const json = generateJSON();
-            const blob = new Blob([json], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `embed_export.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast("💾 JSON exportado (baixado)");
-        });
-        downloadJsonBtn.addEventListener('click', downloadCurrentJSON);
-        
-        // NOVO: Carregar JSON do textarea
-        loadJsonBtn.addEventListener('click', () => {
-            const rawJson = jsonLoaderInput.value.trim();
-            if (!rawJson) {
-                showToast("⚠️ Cole um JSON no campo acima primeiro!", "#f39c12");
-                return;
-            }
-            loadFromJSON(rawJson);
-        });
-        
-        clearJsonLoaderBtn.addEventListener('click', () => {
-            jsonLoaderInput.value = '';
-            showToast("🧹 Campo de JSON limpo");
-        });
-        
+    function resetDefaults() {
+        titleInput.value = 'Meu Servidor';
+        descInput.value = 'Bem-vindo ao servidor.\nExplore os canais e divirta-se.\n**Regras** disponiveis em #regras';
+        colorPicker.value = '#8f74f0';
+        colorHex.value = '#8f74f0';
+        imageInput.value = 'https://i.imgur.com/DnRhPw9.png';
+        thumbnailInput.value = '';
+        footerTextInput.value = 'yBlazer';
+        footerIconInput.value = '';
         updatePreview();
-    </script>
+        showToast("Valores padrao restaurados.");
+    }
+
+    async function sendToWebhook() {
+        const webhookUrl = prompt('Insira a URL do webhook do Discord:');
+        if (!webhookUrl) return;
+        if (!webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
+            showToast("URL invalida. Use um webhook valido.", true);
+            return;
+        }
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: generateJSON()
+            });
+            if (response.ok) showToast("Embed enviado com sucesso!");
+            else showToast(`Erro ${response.status} ao enviar.`, true);
+        } catch (err) {
+            showToast("Falha de conexao. Verifique o CORS.", true);
+        }
+    }
+
+    function copyJSON() {
+        const json = generateJSON();
+        navigator.clipboard.writeText(json).then(() => {
+            showToast("JSON copiado para area de transferencia.");
+        }).catch(() => showToast("Falha ao copiar.", true));
+    }
+
+    // Event listeners
+    titleInput.addEventListener('input', updatePreview);
+    descInput.addEventListener('input', updatePreview);
+    imageInput.addEventListener('input', updatePreview);
+    thumbnailInput.addEventListener('input', updatePreview);
+    footerTextInput.addEventListener('input', updatePreview);
+    footerIconInput.addEventListener('input', updatePreview);
+    colorPicker.addEventListener('input', (e) => {
+        colorHex.value = e.target.value;
+        updatePreview();
+    });
+    colorHex.addEventListener('input', (e) => {
+        let val = e.target.value;
+        if (!val.startsWith('#')) val = '#' + val;
+        if (/^#[0-9A-Fa-f]{6}$/i.test(val)) {
+            colorPicker.value = val;
+            updatePreview();
+        } else if (/^#[0-9A-Fa-f]{3}$/i.test(val)) {
+            let expanded = '#' + val[1]+val[1]+val[2]+val[2]+val[3]+val[3];
+            colorPicker.value = expanded;
+            updatePreview();
+        } else updatePreview();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', copyJSON);
+    document.getElementById('resetBtn').addEventListener('click', resetDefaults);
+    document.getElementById('webhookBtn').addEventListener('click', sendToWebhook);
+    exportJsonBtn.addEventListener('click', () => {
+        const json = generateJSON();
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `embed_blazer.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("JSON exportado.");
+    });
+    downloadJsonBtn.addEventListener('click', () => {
+        const json = generateJSON();
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `embed_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("JSON baixado.");
+    });
+
+    loadJsonBtn.addEventListener('click', () => {
+        const raw = jsonLoaderInput.value.trim();
+        if (!raw) {
+            showToast("Cole um JSON no campo acima.", true);
+            return;
+        }
+        loadFromJSON(raw);
+    });
+
+    clearJsonLoaderBtn.addEventListener('click', () => {
+        jsonLoaderInput.value = '';
+        showToast("Campo de JSON limpo.");
+    });
+
+    updatePreview();
+</script>
 </body>
 </html>
